@@ -1,0 +1,6 @@
+admin,admin123,admin
+officer,gov123,government
+juan,pass123,citizen
+Rhey,742007,citizen
+Rhey,cdo,government
+sbas,sebastien,citizen

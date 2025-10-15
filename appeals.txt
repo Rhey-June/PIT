@@ -1,0 +1,7 @@
+User: john123 | Appeal Type: 1 | Description: Broken street lights on Main St. | Response: Its okay now bro
+User: maria456 | Appeal Type: 2 | Description: Water supply not working in Barangay 5 | Response: Resolved by government
+User: samuel789 | Appeal Type: 3 | Description: Garbage not collected for 2 weeks | Response: Pending
+User: anna321 | Appeal Type: 4 | Description: Local clinic lacks enough medicines | Response: Response: Medicines delivered, issue resolved
+User: john123 | Appeal Type: 5 | Description: Request for public Wi-Fi in plaza | Response: Its okay now bro
+User: Rhey | Type: 1 | Description: Guba na dalan | Response: Pending
+User: sbas | Type: 1 | Description: grabe ka inet yor yawaka | Response: edi waw
