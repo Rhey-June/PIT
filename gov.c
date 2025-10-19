@@ -11,9 +11,9 @@ void inputPassword(char password[]);
 void citizenPage(char username[]);
 int typeofAppeal();
 void submitAppeal(char username[]);
-void viewBulletinBoard();
 void governmentPage();
 void governmentRespondToAppeal();
+const char* getAppealType(int type);
 
 int main() {
     bootScreen();
@@ -62,7 +62,7 @@ void accessMenu() {
 
     while (1) {
         printf("============ MAIN MENU ============\n");
-        printf("1. Register (Citizen)\n");
+        printf("1. Register\n"); // Automatically Register as a Citizen
         printf("2. Login\n");
         printf("3. Exit\n");
         printf("Enter your choice: ");
@@ -102,7 +102,7 @@ void registerUser() {
     }
 
     char username[50], password[50];
-    printf("\n==== REGISTRATION PAGE ====\n");
+    printf("\n============ REGISTRATION PAGE ============\n");
     printf("Enter your username: ");
     scanf("%s", username);
     getchar(); // clear newline
@@ -127,7 +127,7 @@ int loginUser(char loggedUser[], char role[]) {
     char fileUser[50], filePass[50], fileRole[50];
     char line[200];
 
-    printf("\n==== LOGIN PAGE ====\n");
+    printf("\n============ LOGIN PAGE ============\n");
     printf("Enter your username: ");
     scanf("%s", username);
     getchar(); // clear leftover newline
@@ -156,26 +156,57 @@ int loginUser(char loggedUser[], char role[]) {
     return 1;
 }
 
+// Function to map appeal type number to text
+const char* getAppealType(int type) {
+    switch (type) {
+        case 1: return "Infrastructure";
+        case 2: return "Public Services";
+        case 3: return "Environmental";
+        case 4: return "Social Services";
+        case 5: return "Others";
+        default: return "Unknown";
+    }
+}
+
 // Citizen page
 void citizenPage(char username[]) {
-    int choice;
+    FILE *file = fopen("appeals.txt", "r");
 
+    printf("\n=================================================================================================================\n");
+    printf("                                           BULLETIN BOARD                                                        \n");
+    printf("=================================================================================================================\n");
+    printf("%-15s | %-20s | %-45s | %-20s\n", "User", "Type of Appeal", "Description", "Response");
+    printf("-----------------------------------------------------------------------------------------------------------------\n");
+
+    if (file) {
+        char user[50], desc[500], response[500];
+        int type;
+        char line[1024];
+        while (fgets(line, sizeof(line), file)) {
+            if (sscanf(line, "User: %[^|]| Type: %d | Description: %[^|]| Response: %[^\n]", 
+                       user, &type, desc, response) == 4) {
+                printf("%-15s | %-20s | %-45s | %-20s\n", user, getAppealType(type), desc, response);
+            }
+        }
+        fclose(file);
+    } else {
+        printf("No appeals found.\n");
+    }
+    printf("=================================================================================================================\n\n");
+
+    int choice;
     while (1) {
-        printf("==== CITIZEN PAGE ====\n");
+        printf("============ CITIZEN PAGE ============\n");
         printf("1. Submit an Appeal\n");
-        printf("2. View Bulletin Board\n");
-        printf("3. Logout\n");
+        printf("2. Logout\n");
         printf("Enter choice: ");
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
                 submitAppeal(username);
-                break;
+                return;
             case 2:
-                viewBulletinBoard();
-                break;
-            case 3:
                 printf("Logging out...\n\n");
                 return;
             default:
@@ -205,7 +236,7 @@ void submitAppeal(char username[]) {
 // Choose type of appeal
 int typeofAppeal() {
     int type;
-    printf("========== Choose the type of appeal ==========\n");
+    printf("============ Choose the type of appeal ============\n");
     printf("1. Infrastructure Issues\n");
     printf("2. Public Services\n");
     printf("3. Environmental Concerns\n");
@@ -216,40 +247,46 @@ int typeofAppeal() {
     return type;
 }
 
-// View all appeals
-void viewBulletinBoard() {
-    FILE *file = fopen("appeals.txt", "r");
-    if (!file) { printf("No appeals found.\n"); return; }
-
-    char line[1024];
-    printf("\n======= BULLETIN BOARD =======\n");
-    while (fgets(line, sizeof(line), file)) {
-        printf("%s", line);
-    }
-    printf("==============================\n\n");
-    fclose(file);
-}
-
 // Government page
 void governmentPage() {
-    int choice;
+    FILE *file = fopen("appeals.txt", "r");
 
+    printf("\n=================================================================================================================\n");
+    printf("                                           BULLETIN BOARD                                                        \n");
+    printf("=================================================================================================================\n");
+    printf("%-15s | %-20s | %-45s | %-20s\n", "User", "Type of Appeal", "Description", "Response");
+    printf("-----------------------------------------------------------------------------------------------------------------\n");
+
+    if (file) {
+        char user[50], desc[500], response[500];
+        int type;
+        char line[1024];
+        while (fgets(line, sizeof(line), file)) {
+            if (sscanf(line, "User: %[^|]| Type: %d | Description: %[^|]| Response: %[^\n]", 
+                       user, &type, desc, response) == 4) {
+                printf("%-15s | %-20s | %-45s | %-20s\n", user, getAppealType(type), desc, response);
+            }
+        }
+        fclose(file);
+    } else {
+        printf("No appeals found.\n");
+    }
+
+    printf("=================================================================================================================\n\n");
+
+    int choice;
     while (1) {
-        printf("==== GOVERNMENT PAGE ====\n");
-        printf("1. View Bulletin Board\n");
-        printf("2. Respond to an Appeal\n");
-        printf("3. Logout\n");
+        printf("========== GOVERNMENT PAGE ==========\n");
+        printf("1. Respond to an Appeal\n");
+        printf("2. Logout\n");
         printf("Enter choice: ");
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
-                viewBulletinBoard();
-                break;
-            case 2:
                 governmentRespondToAppeal();
-                break;
-            case 3:
+                return;
+            case 2:
                 printf("Logging out...\n\n");
                 return;
             default:
