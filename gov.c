@@ -238,20 +238,25 @@ int typeofAppeal() {
 // Submit appeal
 void submitAppeal(char username[]) {
     FILE *file = fopen("appeals.txt", "a");
-    if (!file) { printf("Error saving appeal.\n"); return; }
+    if (!file) { 
+        printf("Error saving appeal.\n"); 
+        return; 
+    }
 
     int type = typeofAppeal();
     char desc[500];
     getchar(); // clear newline
     printf("Enter your appeal description:");
     fgets(desc, sizeof(desc), stdin);
-    desc[strcspn(desc, "\n")] = '\0';
+    desc[strcspn(desc, "\n")] = '\0'; // remove newline
 
-    fprintf(file, "User: %s | Type: %d | Description: %s | Response: Pending\n", username, type, desc);
+    fprintf(file, "User: %s | Type: %d | Description: %s | Response: Pending\n",
+            username, type, desc);
+
     fclose(file);
-
-    printf("Your appeal has been submitted!\n\n");
+    printf("\nYour appeal has been submitted successfully!\n\n");
 }
+
 
 // Government page
 void governmentPage() {
@@ -267,7 +272,7 @@ void governmentPage() {
         switch (choice) {
             case 1:
                 governmentRespondToAppeal();
-                return;
+                break;
             case 2:
                 printf("Logging out...\n\n");
                 return;
@@ -277,40 +282,71 @@ void governmentPage() {
     }
 }
 
-// Respond to appeal
+// Respond to appeal (with numbering system)
 void governmentRespondToAppeal() {
-    char username[50], response[500];
-    char tempFile[] = "appeals_temp.txt";
-
-    printf("Enter citizen username to respond: ");
-    scanf("%s", username);
-    getchar(); // clear newline
-
-    printf("Enter your response: ");
-    fgets(response, sizeof(response), stdin);
-    response[strcspn(response, "\n")] = '\0';
-
     FILE *file = fopen("appeals.txt", "r");
-    FILE *temp = fopen(tempFile, "w");
-    if (!file || !temp) { printf("Error opening file.\n"); return; }
-
-    char line[1024];
-    while (fgets(line, sizeof(line), file)) {
-        if (strstr(line, username) && strstr(line, "Response: Pending")) {
-            char *pos = strstr(line, "Response: Pending");
-            if (pos) {
-                strcpy(pos, "Response: ");
-                strcat(line, response);
-                strcat(line, "\n");
-            }
-        }
-        fputs(line, temp);
+    if (!file) { 
+        printf("No appeals found.\n"); 
+        return; 
     }
 
+    // Step 1: Display appeals with numbers
+    char lines[100][1024]; // store each appeal line
+    int count = 0;
+    printf("\n=================== APPEALS LIST ===================\n");
+    while (fgets(lines[count], sizeof(lines[count]), file)) {
+        printf("%d. %s", count + 1, lines[count]);
+        count++;
+    }
     fclose(file);
-    fclose(temp);
-    remove("appeals.txt");
-    rename(tempFile, "appeals.txt");
 
-    printf("Response submitted successfully!\n\n");
+    if (count == 0) {
+        printf("No pending appeals.\n");
+        return;
+    }
+
+    // Step 2: Government selects appeal number
+    int choice;
+    printf("\nEnter the number of the appeal you want to respond to: ");
+    scanf("%d", &choice);
+    getchar(); // clear newline
+
+    if (choice < 1 || choice > count) {
+        printf("Invalid choice.\n");
+        return;
+    }
+
+    // Step 3: Get response text
+    char response[500];
+    printf("Enter your response: ");
+    fgets(response, sizeof(response), stdin);
+    response[strcspn(response, "\n")] = '\0'; // remove newline
+
+    // Step 4: Update the chosen appeal
+    FILE *temp = fopen("appeals_temp.txt", "w");
+    if (!temp) {
+        printf("Error opening temp file.\n");
+        return;
+    }
+
+    for (int i = 0; i < count; i++) {
+        if (i == choice - 1) { // target appeal
+            char *pos = strstr(lines[i], "Response: Pending");
+            if (pos) {
+                strcpy(pos, "Response: ");
+                strcat(lines[i], response);
+                strcat(lines[i], "\n");
+            }
+        }
+        fputs(lines[i], temp);
+    }
+
+    fclose(temp);
+
+    // Step 5: Replace old file with updated one
+    remove("appeals.txt");
+    rename("appeals_temp.txt", "appeals.txt");
+
+    printf("\nResponse submitted successfully!\n\n");
 }
+
