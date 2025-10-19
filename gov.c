@@ -8,6 +8,7 @@ void accessMenu();
 void registerUser();
 int loginUser(char loggedUser[], char role[]);
 void inputPassword(char password[]);
+void viewBulletinBoard();
 void citizenPage(char username[]);
 int typeofAppeal();
 void submitAppeal(char username[]);
@@ -167,10 +168,9 @@ const char* getAppealType(int type) {
         default: return "Unknown";
     }
 }
-
-// Citizen page
-void citizenPage(char username[]) {
-    FILE *file = fopen("appeals.txt", "r");
+//Balik na sad ang Bulletin Board
+void viewBulletinBoard(){
+        FILE *file = fopen("appeals.txt", "r");
 
     printf("\n=================================================================================================================\n");
     printf("                                           BULLETIN BOARD                                                        \n");
@@ -194,9 +194,15 @@ void citizenPage(char username[]) {
     }
     printf("=================================================================================================================\n\n");
 
+}
+
+// Citizen page
+void citizenPage(char username[]) {
     int choice;
     while (1) {
+        viewBulletinBoard(); // para dara diretso after mag submit og appeal
         printf("============ CITIZEN PAGE ============\n");
+        printf("Welcome, %s!\n", username);
         printf("1. Submit an Appeal\n");
         printf("2. Logout\n");
         printf("Enter choice: ");
@@ -205,7 +211,7 @@ void citizenPage(char username[]) {
         switch (choice) {
             case 1:
                 submitAppeal(username);
-                return;
+                break;
             case 2:
                 printf("Logging out...\n\n");
                 return;
@@ -213,24 +219,6 @@ void citizenPage(char username[]) {
                 printf("Invalid choice. Try again.\n\n");
         }
     }
-}
-
-// Submit appeal
-void submitAppeal(char username[]) {
-    FILE *file = fopen("appeals.txt", "a");
-    if (!file) { printf("Error saving appeal.\n"); return; }
-
-    int type = typeofAppeal();
-    char desc[500];
-    getchar(); // clear newline
-    printf("Enter your appeal description:\n");
-    fgets(desc, sizeof(desc), stdin);
-    desc[strcspn(desc, "\n")] = '\0';
-
-    fprintf(file, "User: %s | Type: %d | Description: %s | Response: Pending\n", username, type, desc);
-    fclose(file);
-
-    printf("Your appeal has been submitted!\n\n");
 }
 
 // Choose type of appeal
@@ -247,35 +235,29 @@ int typeofAppeal() {
     return type;
 }
 
+// Submit appeal
+void submitAppeal(char username[]) {
+    FILE *file = fopen("appeals.txt", "a");
+    if (!file) { printf("Error saving appeal.\n"); return; }
+
+    int type = typeofAppeal();
+    char desc[500];
+    getchar(); // clear newline
+    printf("Enter your appeal description:");
+    fgets(desc, sizeof(desc), stdin);
+    desc[strcspn(desc, "\n")] = '\0';
+
+    fprintf(file, "User: %s | Type: %d | Description: %s | Response: Pending\n", username, type, desc);
+    fclose(file);
+
+    printf("Your appeal has been submitted!\n\n");
+}
+
 // Government page
 void governmentPage() {
-    FILE *file = fopen("appeals.txt", "r");
-
-    printf("\n=================================================================================================================\n");
-    printf("                                           BULLETIN BOARD                                                        \n");
-    printf("=================================================================================================================\n");
-    printf("%-15s | %-20s | %-45s | %-20s\n", "User", "Type of Appeal", "Description", "Response");
-    printf("-----------------------------------------------------------------------------------------------------------------\n");
-
-    if (file) {
-        char user[50], desc[500], response[500];
-        int type;
-        char line[1024];
-        while (fgets(line, sizeof(line), file)) {
-            if (sscanf(line, "User: %[^|]| Type: %d | Description: %[^|]| Response: %[^\n]", 
-                       user, &type, desc, response) == 4) {
-                printf("%-15s | %-20s | %-45s | %-20s\n", user, getAppealType(type), desc, response);
-            }
-        }
-        fclose(file);
-    } else {
-        printf("No appeals found.\n");
-    }
-
-    printf("=================================================================================================================\n\n");
-
     int choice;
     while (1) {
+        viewBulletinBoard(); // same sa pikas basahi na lang cy
         printf("========== GOVERNMENT PAGE ==========\n");
         printf("1. Respond to an Appeal\n");
         printf("2. Logout\n");
